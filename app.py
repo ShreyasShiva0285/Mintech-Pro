@@ -18,52 +18,109 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
     .stApp {
-        background: linear-gradient(135deg, hsl(260, 30%, 8%) 0%, hsl(240, 20%, 12%) 100%);
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         font-family: 'Inter', sans-serif;
+        color: #ffffff;
     }
     
     .main-header {
-        background: linear-gradient(135deg, hsl(260, 50%, 20%) 0%, hsl(240, 40%, 25%) 100%);
+        background: linear-gradient(135deg, #4c1d95 0%, #3730a3 100%);
         padding: 2rem;
         border-radius: 1rem;
         margin-bottom: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
+        color: #ffffff;
+    }
+    
+    .main-header h1 {
+        color: #ffffff !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .main-header p {
+        color: #e5e7eb !important;
+        margin: 0;
     }
     
     .metric-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
         padding: 1.5rem;
         border-radius: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
         margin-bottom: 1rem;
     }
     
-    h1, h2, h3 {
-        color: white;
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
         font-weight: 600;
     }
     
+    .stMarkdown p, .stMarkdown div {
+        color: #ffffff !important;
+    }
+    
     .stMetric {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
         padding: 1rem;
         border-radius: 0.75rem;
-        border: 1px solid rgba(139, 92, 246, 0.2);
+        border: 1px solid rgba(139, 92, 246, 0.3);
     }
     
     .stMetric > div {
-        color: white !important;
+        color: #ffffff !important;
+    }
+    
+    .stMetric label {
+        color: #e5e7eb !important;
     }
     
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, hsl(260, 25%, 15%) 0%, hsl(240, 20%, 10%) 100%);
+        background: linear-gradient(180deg, #2d1b69 0%, #1a1a2e 100%);
     }
     
     .stDataFrame {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 0.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stDataFrame th {
+        background-color: rgba(139, 92, 246, 0.3) !important;
+        color: #ffffff !important;
+    }
+    
+    .stDataFrame td {
+        color: #ffffff !important;
+    }
+    
+    .insight-box {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: #ffffff;
+    }
+    
+    .warning-box {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: #ffffff;
+    }
+    
+    .stSelectbox > div > div {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .stRadio > div {
+        color: #ffffff !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -258,6 +315,17 @@ if selected_tab == "📋 Company Overview":
         monthly_sales = df_year.groupby('sales_month')['sales_Grand Amount'].sum().reset_index()
         monthly_sales['sales_month'] = monthly_sales['sales_month'].astype(str)
         st.line_chart(monthly_sales.set_index('sales_month'))
+        
+        # Insight box
+        if len(monthly_sales) > 0:
+            peak_month = monthly_sales.loc[monthly_sales['sales_Grand Amount'].idxmax(), 'sales_month']
+            peak_value = monthly_sales['sales_Grand Amount'].max()
+            st.markdown(f"""
+            <div class="insight-box">
+                <strong>📊 Key Insight:</strong> Peak sales month was {peak_month} with ₹{peak_value:,.0f}. 
+                Consider analyzing what drove this performance for replication.
+            </div>
+            """, unsafe_allow_html=True)
     
     with col2:
         st.subheader("💰 Monthly Profit Analysis")
@@ -268,6 +336,17 @@ if selected_tab == "📋 Company Overview":
         monthly_profit['net_profit'] = monthly_profit['sales_Grand Amount'] - monthly_profit['Purchase Grand Amount']
         monthly_profit['sales_month'] = monthly_profit['sales_month'].astype(str)
         st.bar_chart(monthly_profit.set_index('sales_month')[['net_profit']])
+        
+        # Profit insight
+        if len(monthly_profit) > 0:
+            avg_profit = monthly_profit['net_profit'].mean()
+            profit_trend = "increasing" if monthly_profit['net_profit'].iloc[-1] > avg_profit else "decreasing"
+            st.markdown(f"""
+            <div class="insight-box">
+                <strong>💰 Profit Insight:</strong> Average monthly profit is ₹{avg_profit:,.0f}. 
+                Current trend is {profit_trend}. Focus on cost optimization if profits are declining.
+            </div>
+            """, unsafe_allow_html=True)
 
 elif selected_tab == "💰 Sales & Revenue":
     st.markdown('<div class="main-header"><h1>💰 Sales & Revenue Analysis</h1><p>Detailed breakdown of revenue streams and customer insights</p></div>', unsafe_allow_html=True)
@@ -296,6 +375,17 @@ elif selected_tab == "💰 Sales & Revenue":
         monthly_revenue = df_year.groupby('sales_month')['sales_Grand Amount'].sum().reset_index()
         monthly_revenue['sales_month'] = monthly_revenue['sales_month'].astype(str)
         st.bar_chart(monthly_revenue.set_index('sales_month'))
+        
+        # Revenue insight
+        if len(monthly_revenue) > 0:
+            total_months = len(monthly_revenue)
+            avg_monthly_revenue = monthly_revenue['sales_Grand Amount'].mean()
+            st.markdown(f"""
+            <div class="insight-box">
+                <strong>💰 Revenue Insight:</strong> Average monthly revenue is ₹{avg_monthly_revenue:,.0f} across {total_months} months. 
+                Focus on customer retention strategies to maintain steady revenue flow.
+            </div>
+            """, unsafe_allow_html=True)
     
     with col2:
         st.subheader("🥧 GST Distribution")
@@ -305,6 +395,17 @@ elif selected_tab == "💰 Sales & Revenue":
             'IGST': [df_year['sales_Tax Amount IGST'].sum()]
         })
         st.bar_chart(gst_data)
+        
+        # GST insight
+        total_gst = gst_data.sum().sum()
+        if total_gst > 0:
+            igst_percentage = (df_year['sales_Tax Amount IGST'].sum() / total_gst) * 100
+            st.markdown(f"""
+            <div class="insight-box">
+                <strong>🧾 GST Insight:</strong> IGST represents {igst_percentage:.1f}% of total GST, indicating 
+                {'high' if igst_percentage > 30 else 'low'} interstate business activity.
+            </div>
+            """, unsafe_allow_html=True)
     
     # Top customers
     st.subheader("🏆 Top 5 Customers by Revenue")
@@ -315,6 +416,17 @@ elif selected_tab == "💰 Sales & Revenue":
         }).round(2).sort_values('sales_Grand Amount', ascending=False).head(5)
         top_customers.columns = ['Total Revenue (₹)', 'Transactions']
         st.dataframe(top_customers, use_container_width=True)
+        
+        # Customer insight
+        if len(top_customers) > 0:
+            top_customer_name = top_customers.index[0]
+            top_customer_revenue = top_customers.iloc[0, 0]
+            st.markdown(f"""
+            <div class="insight-box">
+                <strong>👑 Top Customer:</strong> {top_customer_name} contributes ₹{top_customer_revenue:,.0f} 
+                ({(top_customer_revenue/total_revenue*100):.1f}% of total revenue). Strengthen this relationship!
+            </div>
+            """, unsafe_allow_html=True)
 
 elif selected_tab == "📈 Trends & Analytics":
     st.markdown('<div class="main-header"><h1>📈 Business Trends & Analytics</h1><p>Deep insights into customer behavior and business patterns</p></div>', unsafe_allow_html=True)
@@ -439,9 +551,11 @@ elif selected_tab == "🤖 ML Forecasting":
             else:
                 forecast = [historical_values[-1]] * 6 if historical_values else [0] * 6
         
-        # Calculate metrics
-        total_forecast = sum(forecast)
-        growth_rate = ((forecast[0] / historical_values[-1]) - 1) * 100 if historical_values else 0
+        # Calculate metrics safely
+        total_forecast = sum(forecast) if forecast else 0
+        growth_rate = 0
+        if historical_values and len(historical_values) > 0 and historical_values[-1] != 0:
+            growth_rate = ((forecast[0] / historical_values[-1]) - 1) * 100 if forecast else 0
         
         # Display metrics
         col1, col2, col3, col4 = st.columns(4)
