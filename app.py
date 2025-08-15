@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -159,22 +158,33 @@ def generate_sample_data():
     
     return df
 
-# ML Forecasting functions
-def generate_linear_forecast(data):
-    """Generate linear regression forecast"""
+# Simple forecasting functions
+def generate_simple_forecast(data):
+    """Generate simple forecast using basic math"""
     if len(data) < 2:
         return [data[-1] if data else 0] * 6
     
-    X = np.array(range(len(data))).reshape(-1, 1)
-    y = np.array(data)
+    # Simple linear trend calculation
+    x_vals = list(range(len(data)))
+    y_vals = list(data)
     
-    model = LinearRegression()
-    model.fit(X, y)
+    # Calculate slope
+    n = len(data)
+    sum_x = sum(x_vals)
+    sum_y = sum(y_vals)
+    sum_xy = sum(x_vals[i] * y_vals[i] for i in range(n))
+    sum_x2 = sum(x * x for x in x_vals)
     
-    future_X = np.array(range(len(data), len(data) + 6)).reshape(-1, 1)
-    forecast = model.predict(future_X)
+    slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x) if (n * sum_x2 - sum_x * sum_x) != 0 else 0
+    intercept = (sum_y - slope * sum_x) / n
     
-    return np.maximum(0, forecast)
+    # Generate forecast
+    forecast = []
+    for i in range(6):
+        predicted = intercept + slope * (len(data) + i)
+        forecast.append(max(0, predicted))
+    
+    return forecast
 
 # Load data
 df = load_data()
@@ -416,7 +426,7 @@ elif selected_tab == "🤖 ML Forecasting":
         
         # Generate forecast based on selected model
         if selected_model == "Linear Regression":
-            forecast = generate_linear_forecast(historical_values)
+            forecast = generate_simple_forecast(historical_values)
         elif selected_model == "Moving Average":
             window = min(3, len(historical_values))
             avg = np.mean(historical_values[-window:]) if len(historical_values) >= window else historical_values[-1]
